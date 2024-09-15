@@ -24,16 +24,12 @@ func generateClientID() string {
 	return uuid.New().String()
 }
 
-type ClientInfo struct {
-	Conn     *websocket.Conn
-	ClientID string
-}
-
 type message struct {
 	Username string `json:"username"`
 	Message  string `json:"message"`
 	To       string `json:"to"`
 }
+
 type WebsocketManager struct {
 	Clients    map[*ClientInfo]bool
 	Broadcast  chan interface{}
@@ -41,6 +37,12 @@ type WebsocketManager struct {
 	Unregister chan *ClientInfo
 }
 
+type ClientInfo struct {
+	Conn     *websocket.Conn
+	ClientID string
+}
+
+// Instancira novi Manager
 func NewWebsocketManager() *WebsocketManager {
 	return &WebsocketManager{
 		Clients:    make(map[*ClientInfo]bool),
@@ -50,16 +52,20 @@ func NewWebsocketManager() *WebsocketManager {
 	}
 }
 
+// Startuje event loop koji slusa poruke
 func (wsManager *WebsocketManager) Start() {
 	for {
 		select {
+		// Dodaj klienta
 		case client := <-wsManager.Register:
 			wsManager.Clients[client] = true
 			fmt.Printf("%s connected\n", client.ClientID)
 
+			// Ukloni klienta
 		case client := <-wsManager.Unregister:
 			delete(wsManager.Clients, client)
 
+			// Posalji poruku svim povezanim klijentima
 		case message := <-wsManager.Broadcast:
 			msg, err := json.Marshal(message)
 			if err != nil {
@@ -80,12 +86,14 @@ func (wsManager *WebsocketManager) Start() {
 	}
 }
 
+// Ovo trenutno ne radi nista
 func (wsManager *WebsocketManager) Shutdown() {
 	for client := range wsManager.Clients {
 		client.Conn.Close()
 	}
 }
 
+// Povezivanje na endpoint servera
 func EndpointHandler(wsManager *WebsocketManager, ctx *gin.Context) {
 	// Upgrade connection from http to ws
 	conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
@@ -94,12 +102,14 @@ func EndpointHandler(wsManager *WebsocketManager, ctx *gin.Context) {
 	}
 
 	client := &ClientInfo{
-		Conn:     conn,
+		Conn: conn,
+		// TODO: Sacuvati ID i poslati ga klientu radi logovanja
 		ClientID: generateClientID(),
 	}
 
 	wsManager.Register <- client
 
+	// Citaj poruke koje klijent salje
 	for {
 		_, message, err := client.Conn.ReadMessage()
 		if err != nil {
@@ -107,7 +117,11 @@ func EndpointHandler(wsManager *WebsocketManager, ctx *gin.Context) {
 			client.Conn.Close()
 			break
 		}
+		// DEBUG
 		fmt.Println(string(message))
+
+		// Ovo nije u funkciji
+		// wsManager.Broadcast <- message
 	}
 }
 
