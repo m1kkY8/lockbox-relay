@@ -21,17 +21,17 @@ var upgrader = websocket.Upgrader{
 }
 
 type WebsocketManager struct {
-	Clients     map[string]*ClientInfo
-	OnlineUsers map[string]bool
-	Broadcast   chan []byte
-	Register    chan *ClientInfo
-	Unregister  chan *ClientInfo
-	Mutex       sync.Mutex
+	Clients    map[string]*ClientInfo
+	Broadcast  chan []byte
+	Register   chan *ClientInfo
+	Unregister chan *ClientInfo
+	Mutex      sync.Mutex
 }
 
 type ClientInfo struct {
 	Conn     *websocket.Conn
 	ClientID string
+	Color    string
 	Username string
 	Pubkey   string
 }
@@ -39,11 +39,10 @@ type ClientInfo struct {
 // Instancira novi Manager
 func NewWebsocketManager() *WebsocketManager {
 	return &WebsocketManager{
-		Clients:     make(map[string]*ClientInfo),
-		OnlineUsers: make(map[string]bool),
-		Broadcast:   make(chan []byte),
-		Register:    make(chan *ClientInfo),
-		Unregister:  make(chan *ClientInfo),
+		Clients:    make(map[string]*ClientInfo),
+		Broadcast:  make(chan []byte),
+		Register:   make(chan *ClientInfo),
+		Unregister: make(chan *ClientInfo),
 	}
 }
 
@@ -54,14 +53,12 @@ func (wsManager *WebsocketManager) Start() {
 		// Dodaj klienta
 		case client := <-wsManager.Register:
 			wsManager.Clients[client.ClientID] = client
-			wsManager.OnlineUsers[client.Username] = true
 			broadcastOnlineUsers(wsManager)
 
 			// Ukloni klienta
 
 		case client := <-wsManager.Unregister:
 			delete(wsManager.Clients, client.ClientID)
-			delete(wsManager.OnlineUsers, client.Username)
 			broadcastOnlineUsers(wsManager)
 
 			// Posalji poruku svim povezanim klijentima
@@ -83,7 +80,6 @@ func (wsManager *WebsocketManager) Shutdown() {
 	for _, client := range wsManager.Clients {
 		client.Conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "Server is shutting down"))
 		client.Conn.Close()
-
 	}
 }
 
@@ -111,6 +107,7 @@ func EndpointHandler(wsManager *WebsocketManager, ctx *gin.Context) {
 	client := &ClientInfo{
 		Conn:     conn,
 		ClientID: handshake.ClientId,
+		Color:    handshake.Color,
 		Username: handshake.Username,
 		Pubkey:   handshake.PublicKey,
 	}
@@ -132,8 +129,9 @@ func EndpointHandler(wsManager *WebsocketManager, ctx *gin.Context) {
 func GetAllUsers(wsManager *WebsocketManager) []byte {
 	var usernames []string
 
-	for name := range wsManager.OnlineUsers {
-		usernames = append(usernames, name)
+	for _, client := range wsManager.Clients {
+		coloredName := client.Color + ":" + client.Username
+		usernames = append(usernames, coloredName)
 	}
 
 	userString := strings.Join(usernames, " ")
