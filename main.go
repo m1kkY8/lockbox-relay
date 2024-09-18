@@ -1,9 +1,7 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -25,14 +23,15 @@ func generateClientID() string {
 }
 
 type message struct {
-	Username string `json:"username"`
-	Message  string `json:"message"`
-	To       string `json:"to"`
+	Timestamp string `json:"timestamp"`
+	Username  string `json:"username"`
+	Message   string `json:"message"`
+	To        string `json:"to"`
 }
 
 type WebsocketManager struct {
 	Clients    map[*ClientInfo]bool
-	Broadcast  chan interface{}
+	Broadcast  chan []byte
 	Register   chan *ClientInfo
 	Unregister chan *ClientInfo
 }
@@ -46,7 +45,7 @@ type ClientInfo struct {
 func NewWebsocketManager() *WebsocketManager {
 	return &WebsocketManager{
 		Clients:    make(map[*ClientInfo]bool),
-		Broadcast:  make(chan interface{}),
+		Broadcast:  make(chan []byte),
 		Register:   make(chan *ClientInfo),
 		Unregister: make(chan *ClientInfo),
 	}
@@ -59,23 +58,16 @@ func (wsManager *WebsocketManager) Start() {
 		// Dodaj klienta
 		case client := <-wsManager.Register:
 			wsManager.Clients[client] = true
-			fmt.Printf("%s connected\n", client.ClientID)
 
 			// Ukloni klienta
+
 		case client := <-wsManager.Unregister:
 			delete(wsManager.Clients, client)
 
 			// Posalji poruku svim povezanim klijentima
 		case message := <-wsManager.Broadcast:
-			msg, err := json.Marshal(message)
-			if err != nil {
-				log.Println("error marshaling message")
-				continue
-			}
-			fmt.Println()
-
 			for client := range wsManager.Clients {
-				if err := client.Conn.WriteMessage(websocket.TextMessage, msg); err != nil {
+				if err := client.Conn.WriteMessage(websocket.BinaryMessage, message); err != nil {
 					fmt.Println("Error writing to websocket")
 					client.Conn.Close()
 					delete(wsManager.Clients, client)
@@ -86,9 +78,9 @@ func (wsManager *WebsocketManager) Start() {
 	}
 }
 
-// Ovo trenutno ne radi nista
 func (wsManager *WebsocketManager) Shutdown() {
 	for client := range wsManager.Clients {
+		client.Conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "Server is shutting down"))
 		client.Conn.Close()
 	}
 }
@@ -99,6 +91,7 @@ func EndpointHandler(wsManager *WebsocketManager, ctx *gin.Context) {
 	conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 	if err != nil {
 		fmt.Println("error upgrading")
+		return
 	}
 
 	client := &ClientInfo{
@@ -117,11 +110,7 @@ func EndpointHandler(wsManager *WebsocketManager, ctx *gin.Context) {
 			client.Conn.Close()
 			break
 		}
-		// DEBUG
-		fmt.Println(string(message))
-
-		// Ovo nije u funkciji
-		// wsManager.Broadcast <- message
+		wsManager.Broadcast <- message
 	}
 }
 
@@ -130,10 +119,15 @@ func main() {
 	wsManager := NewWebsocketManager()
 
 	go wsManager.Start()
+	// defer wsManager.Shutdown()
 
 	router.GET("/ws", func(ctx *gin.Context) {
 		EndpointHandler(wsManager, ctx)
 	})
 
-	router.Run(":42069")
+	router.GET("/health", func(ctx *gin.Context) {
+		ctx.IndentedJSON(http.StatusOK, gin.H{"status": "ok"})
+	})
+
+	router.Run(":1337")
 }
