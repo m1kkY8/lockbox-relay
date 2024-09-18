@@ -3,8 +3,8 @@ package entity
 import "github.com/vmihailenco/msgpack/v5"
 
 var (
-	ChatMessage   = 1
-	ServerMessage = 2
+	ServerMessage = 1
+	ChatMessage   = 2
 )
 
 type Message struct {
