@@ -5,19 +5,13 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"github.com/m1kkY8/gochat-relay/src/entity"
 	"github.com/m1kkY8/gochat-relay/src/ws"
 )
 
 // Povezivanje na endpoint servera
-func EndpointHandler(wsManager *ws.WebsocketManager, ctx *gin.Context) {
-	// Upgrade connection from http to ws
-	conn, err := ws.Upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
-	if err != nil {
-		log.Println("error upgrading")
-		return
-	}
-
+func EndpointHandler(wsManager *ws.WebsocketManager, ctx *gin.Context, conn *websocket.Conn) {
 	_, bytesHandshake, err := conn.ReadMessage()
 	if err != nil {
 		log.Println("error reading handshake")
@@ -59,7 +53,13 @@ func main() {
 	go wsManager.Start()
 
 	router.GET("/ws", func(ctx *gin.Context) {
-		EndpointHandler(wsManager, ctx)
+		conn, err := ws.Upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+		if err != nil {
+			log.Println("error upgrading")
+			return
+		}
+
+		go EndpointHandler(wsManager, ctx, conn)
 	})
 
 	router.GET("/health", func(ctx *gin.Context) {
