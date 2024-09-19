@@ -183,7 +183,7 @@ func main() {
 	})
 
 	router.GET("/health", func(ctx *gin.Context) {
-		ctx.IndentedJSON(http.StatusOK, gin.H{"status": "ok"})
+		ctx.IndentedJSON(http.StatusOK, gin.H{"status": "nikola gej"})
 	})
 
 	router.Run(":1337")
