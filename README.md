@@ -6,8 +6,8 @@
 
 - Familiarity with linux command line
 - Linux server with docker and nginx installed
-- TLS certificate for CA, [Let's Encrypt](https://letsencrypt.org/) for example
-- Domain [no-ip](https://www.noip.com/)
+- TLS certificate from CA, [Let's Encrypt](https://letsencrypt.org/) for example
+- Domain from [no-ip](https://www.noip.com/) or any other domain provider
 
 ## Installation guide
 
