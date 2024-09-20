@@ -61,6 +61,14 @@ apt update && apt upgrade -y
 
 ```
 
+#### Setting up the domain
+
+For this we will use [no-ip](https://www.noip.com/)
+
+1. Create account on [no-ip](https://www.noip.com/)
+2. Add a new host
+3. Choose a domain name
+
 #### Creating the SSH key/pair
 
 We will create the ssh key pair to avoid using password for ssh
@@ -115,4 +123,201 @@ ssh-copy-id -i ~/.ssh/<key_name>.pub root@<ip_address>
 
 ```bash
 sudo systemctl restart ssh
+```
+
+##### Setting up the firewall
+
+1. Check the status of the firewall
+
+```bash
+ufw status
+```
+
+2. If the firewall is not active enable it
+
+```bash
+ufw enable
+```
+
+3. Allow the ssh port
+
+```bash
+ufw allow <port_number>
+```
+
+4. Allow the http and https ports
+
+```bash
+ufw allow 80
+ufw allow 443
+```
+
+5. Enable the firewall
+
+```bash
+ufw enable
+```
+
+6. Check the status of the firewall
+
+```bash
+ufw status
+```
+
+3. Reboot the server
+
+```bash
+sudo reboot now
+```
+
+After the reboot you can ssh into the server using the new port
+
+```bash
+ssh -p <port_number> -i ~/.ssh/<key_name> <your_user>@<ip_address>
+```
+
+##### Installing docker
+
+For installation guide you can visit the [official docker documentation](https://docs.docker.com/engine/install/ubuntu/)
+
+1. Add Docker's official GPG key
+
+```bash
+# Add Docker's official GPG key:
+sudo apt-get update
+sudo apt-get install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# Add the repository to Apt sources:
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+```
+
+2. Install Docker
+
+```bash
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+3. Add your user to the docker group in order to run docker commands without sudo
+
+```bash
+sudo usermod -aG docker $USER
+```
+
+4. Reboot the server
+
+```bash
+sudo reboot now
+```
+
+5. Check if docker is installed correctly
+
+```bash
+docker --version
+```
+
+```bash
+docker run hello-world
+```
+
+##### Installing Nginx
+
+We will need nginx for our server to get the TLS certificate from Let's Encrypt
+
+1. Install Nginx
+
+```bash
+sudo apt update && sudo apt install nginx
+```
+
+2. Start the Nginx service
+
+```bash
+sudo systemctl start nginx
+```
+
+##### Getting the TLS certificates
+
+For this we will use certbot
+
+1. Install certbot
+
+```bash
+sudo apt install certbot
+```
+
+2. Get the certificate
+
+```bash
+sudo certbot certonly --standalone -d <your_domain>
+```
+
+3. Check if the certificate is installed correctly
+
+```bash
+sudo ls /etc/letsencrypt/live/<your_domain>
+```
+
+4. We can now disable nginx
+
+```bash
+sudo systemctl stop nginx
+```
+
+##### Setting up the relay server
+
+1. Compose file for the server is provided in this repository alongside the nginx configuration
+
+2. Clone the repository
+
+```bash
+git clone https://github.com/m1kkY8/gochat-relay.git
+```
+
+3. Create directory for the server where you want to run docker compose file from and copy contents of the configs folder to that directory
+
+```bash
+mkdir -p ~/<server_directory>
+cd ~/<server_directory>
+```
+
+4. Copy the contents of the configs folder to the server directory
+
+```bash
+cp -r ~/gochat-relay/configs/* ~/<server_directory>
+```
+
+Note: Server is currently running on docker image i built and pushed to docker hub, you can build the image yourself by running the following command in the server directory
+
+```bash
+# Build docker image on your local machine and push it to docker hub
+# You need to have docker installed on your local machine
+# And will need docker account to push the image
+docker build -t <image_name> . --push
+```
+
+5. Run the docker compose file
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
+6. Check if the server is running
+
+```bash
+docker ps
+```
+
+7. Check if the server is accessible
+
+```bash
+curl https://<your_domain>/health
+
 ```
