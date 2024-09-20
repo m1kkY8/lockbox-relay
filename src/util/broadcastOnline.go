@@ -3,17 +3,17 @@ package util
 import (
 	"log"
 	"strings"
+	"sync"
 
 	"github.com/gorilla/websocket"
 	"github.com/m1kkY8/gochat-relay/src/entity"
-	"github.com/m1kkY8/gochat-relay/src/ws"
 	"github.com/vmihailenco/msgpack/v5"
 )
 
-func getAllUsers(wsManager *ws.WebsocketManager) []byte {
+func getAllUsers(clients map[string]*entity.ClientInfo) []byte {
 	var usernames []string
 
-	for _, client := range wsManager.Clients {
+	for _, client := range clients {
 		coloredName := client.Color + ":" + client.Username
 		usernames = append(usernames, coloredName)
 	}
@@ -36,11 +36,11 @@ func getAllUsers(wsManager *ws.WebsocketManager) []byte {
 	return encodedMessage
 }
 
-func BroadcastOnlineUsers(wsManager *ws.WebsocketManager) {
-	for _, client := range wsManager.Clients {
+func BroadcastOnlineUsers(clients map[string]*entity.ClientInfo, mutex *sync.Mutex) {
+	for _, client := range clients {
 
-		wsManager.Mutex.Lock()
-		names := getAllUsers(wsManager)
+		mutex.Lock()
+		names := getAllUsers(clients)
 
 		if client.Conn == nil {
 			continue
@@ -50,8 +50,9 @@ func BroadcastOnlineUsers(wsManager *ws.WebsocketManager) {
 		if err != nil {
 			log.Println("Error writing to websocket")
 			client.Conn.Close()
-			delete(wsManager.Clients, client.ClientID)
+			delete(clients, client.ClientID)
+
 		}
-		wsManager.Mutex.Unlock()
+		mutex.Unlock()
 	}
 }

@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/m1kkY8/gochat-relay/src/entity"
+	"github.com/m1kkY8/gochat-relay/src/util"
 )
 
 var Upgrader = websocket.Upgrader{
@@ -41,11 +42,12 @@ func (wsManager *WebsocketManager) Start() {
 		// Dodaj klienta
 		case client := <-wsManager.Register:
 			wsManager.Clients[client.ClientID] = client
-
+			util.BroadcastOnlineUsers(wsManager.Clients, &wsManager.Mutex)
 			// Ukloni klienta
 
 		case client := <-wsManager.Unregister:
 			delete(wsManager.Clients, client.ClientID)
+			util.BroadcastOnlineUsers(wsManager.Clients, &wsManager.Mutex)
 
 			// Posalji poruku svim povezanim klijentima
 		case message := <-wsManager.Broadcast:
