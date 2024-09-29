@@ -12,6 +12,7 @@ import (
 // Povezivanje na endpoint servera
 
 func main() {
+	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	wsManager := ws.NewWebsocketManager()
 
@@ -28,7 +29,7 @@ func main() {
 	})
 
 	router.GET("/health", func(ctx *gin.Context) {
-		ctx.IndentedJSON(http.StatusOK, gin.H{"status": "nikola gej"})
+		ctx.IndentedJSON(http.StatusOK, gin.H{"status": "alive"})
 	})
 
 	router.Run(":1337")

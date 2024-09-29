@@ -8,4 +8,5 @@ type ClientInfo struct {
 	Color    string
 	Username string
 	Pubkey   string
+	Room     string
 }

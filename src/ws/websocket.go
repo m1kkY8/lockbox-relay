@@ -1,13 +1,11 @@
 package ws
 
 import (
-	"log"
 	"net/http"
 	"sync"
 
 	"github.com/gorilla/websocket"
 	"github.com/m1kkY8/gochat-relay/src/entity"
-	"github.com/m1kkY8/gochat-relay/src/util"
 )
 
 var Upgrader = websocket.Upgrader{
@@ -19,9 +17,15 @@ var Upgrader = websocket.Upgrader{
 	},
 }
 
+type Room struct {
+	Name    string
+	Message []byte
+}
+
 type WebsocketManager struct {
 	Clients    map[string]*entity.ClientInfo
-	Broadcast  chan []byte
+	Rooms      map[string]map[string]*entity.ClientInfo
+	Broadcast  chan *Room
 	Register   chan *entity.ClientInfo
 	Unregister chan *entity.ClientInfo
 	Mutex      sync.Mutex
@@ -30,43 +34,9 @@ type WebsocketManager struct {
 func NewWebsocketManager() *WebsocketManager {
 	return &WebsocketManager{
 		Clients:    make(map[string]*entity.ClientInfo),
-		Broadcast:  make(chan []byte),
+		Rooms:      make(map[string]map[string]*entity.ClientInfo),
+		Broadcast:  make(chan *Room),
 		Register:   make(chan *entity.ClientInfo),
 		Unregister: make(chan *entity.ClientInfo),
-	}
-}
-
-func (wsManager *WebsocketManager) Start() {
-	for {
-		select {
-		// Dodaj klienta
-		case client := <-wsManager.Register:
-			wsManager.Clients[client.ClientID] = client
-			util.BroadcastOnlineUsers(wsManager.Clients, &wsManager.Mutex)
-			// Ukloni klienta
-
-		case client := <-wsManager.Unregister:
-			delete(wsManager.Clients, client.ClientID)
-			util.BroadcastOnlineUsers(wsManager.Clients, &wsManager.Mutex)
-
-			// Posalji poruku svim povezanim klijentima
-		case message := <-wsManager.Broadcast:
-			for _, client := range wsManager.Clients {
-
-				err := client.Conn.WriteMessage(websocket.BinaryMessage, message)
-				if err != nil {
-					log.Println("Error writing to websocket")
-					client.Conn.Close()
-					delete(wsManager.Clients, client.ClientID)
-				}
-			}
-		}
-	}
-}
-
-func (wsManager *WebsocketManager) Shutdown() {
-	for _, client := range wsManager.Clients {
-		client.Conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "Server is shutting down"))
-		client.Conn.Close()
 	}
 }
