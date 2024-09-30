@@ -18,9 +18,10 @@ func (wsManager *WebsocketManager) registerClient(client *entity.ClientInfo) err
 
 	// Add client to Room
 	wsManager.Rooms[client.Room][client.ClientID] = client
+	wsManager.PublicKeys[client.ClientID] = client.Pubkey
 
 	util.BroadcastOnlineUsers(wsManager.Clients, &wsManager.Mutex)
-
+	util.SendKeys(wsManager.Clients, wsManager.PublicKeys, &wsManager.Mutex)
 	return nil
 	// Log and exit if room is empty
 }

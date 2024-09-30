@@ -8,7 +8,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/m1kkY8/gochat-relay/src/entity"
 	"github.com/m1kkY8/gochat-relay/src/ws"
-	websocket1 "github.com/m1kkY8/gochat-relay/src/ws"
 )
 
 type Commands interface {
@@ -42,7 +41,7 @@ func createClient(handshake *entity.Handshake, conn *websocket.Conn) *entity.Cli
 	}
 }
 
-func EndpointHandler(wsManager *websocket1.WebsocketManager, ctx *gin.Context, conn *websocket.Conn) {
+func EndpointHandler(wsManager *ws.WebsocketManager, ctx *gin.Context, conn *websocket.Conn) {
 	handshake, err := readHandshake(conn)
 	if err != nil {
 		log.Println("Error reading handshake:", err)

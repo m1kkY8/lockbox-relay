@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"crypto/rsa"
 	"net/http"
 	"sync"
 
@@ -25,6 +26,7 @@ type Room struct {
 type WebsocketManager struct {
 	Clients    map[string]*entity.ClientInfo
 	Rooms      map[string]map[string]*entity.ClientInfo
+	PublicKeys map[string]*rsa.PublicKey
 	Broadcast  chan *Room
 	Register   chan *entity.ClientInfo
 	Unregister chan *entity.ClientInfo
@@ -35,6 +37,7 @@ func NewWebsocketManager() *WebsocketManager {
 	return &WebsocketManager{
 		Clients:    make(map[string]*entity.ClientInfo),
 		Rooms:      make(map[string]map[string]*entity.ClientInfo),
+		PublicKeys: make(map[string]*rsa.PublicKey),
 		Broadcast:  make(chan *Room),
 		Register:   make(chan *entity.ClientInfo),
 		Unregister: make(chan *entity.ClientInfo),

@@ -1,12 +1,16 @@
 package entity
 
-import "github.com/vmihailenco/msgpack/v5"
+import (
+	"crypto/rsa"
+
+	"github.com/vmihailenco/msgpack/v5"
+)
 
 type Handshake struct {
-	Username  string `msgpack:"username"`
-	Color     string `msgpack:"color"`
-	ClientId  string `msgpack:"client_id"`
-	PublicKey string `msgpack:"pubkey"`
+	Username  string         `msgpack:"username"`
+	Color     string         `msgpack:"color"`
+	ClientId  string         `msgpack:"client_id"`
+	PublicKey *rsa.PublicKey `msgpack:"pubkey"`
 }
 
 func DecodeHandshake(encodedHandshake []byte) (Handshake, error) {

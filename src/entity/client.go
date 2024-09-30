@@ -1,12 +1,17 @@
 package entity
 
-import "github.com/gorilla/websocket"
+import (
+	"crypto/rsa"
+
+	"github.com/gorilla/websocket"
+)
 
 type ClientInfo struct {
 	Conn     *websocket.Conn
 	ClientID string
 	Color    string
 	Username string
-	Pubkey   string
+	Pubkey   *rsa.PublicKey
 	Room     string
+	Amogus   string
 }

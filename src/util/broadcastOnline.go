@@ -10,7 +10,7 @@ import (
 	"github.com/vmihailenco/msgpack/v5"
 )
 
-func getAllUsers(clients map[string]*entity.ClientInfo) []byte {
+func GetAllUsers(clients map[string]*entity.ClientInfo) []byte {
 	var usernames []string
 
 	for _, client := range clients {
@@ -40,7 +40,7 @@ func BroadcastOnlineUsers(clients map[string]*entity.ClientInfo, mutex *sync.Mut
 	for _, client := range clients {
 
 		mutex.Lock()
-		names := getAllUsers(clients)
+		names := GetAllUsers(clients)
 
 		if client.Conn == nil {
 			continue
