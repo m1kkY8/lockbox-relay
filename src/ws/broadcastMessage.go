@@ -2,11 +2,13 @@ package ws
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/gorilla/websocket"
 )
 
 func (wsManager *WebsocketManager) broadcast(message *Room) error {
+	log.Printf("Broadcast channel length: %d, capacity: %d", len(wsManager.Broadcast), cap(wsManager.Broadcast))
 	roomName := message.Name
 
 	if roomName == "" {

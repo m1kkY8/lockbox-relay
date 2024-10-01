@@ -38,8 +38,8 @@ func NewWebsocketManager() *WebsocketManager {
 		Clients:    make(map[string]*entity.ClientInfo),
 		Rooms:      make(map[string]map[string]*entity.ClientInfo),
 		PublicKeys: make(map[string]*rsa.PublicKey),
-		Broadcast:  make(chan *Room),
-		Register:   make(chan *entity.ClientInfo),
-		Unregister: make(chan *entity.ClientInfo),
+		Broadcast:  make(chan *Room, 10),
+		Register:   make(chan *entity.ClientInfo, 10),
+		Unregister: make(chan *entity.ClientInfo, 10),
 	}
 }

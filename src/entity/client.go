@@ -13,5 +13,15 @@ type ClientInfo struct {
 	Username string
 	Pubkey   *rsa.PublicKey
 	Room     string
-	Amogus   string
+}
+
+func NewClient(handshake Handshake, conn *websocket.Conn) *ClientInfo {
+	return &ClientInfo{
+		Conn:     conn,
+		ClientID: handshake.ClientId,
+		Color:    handshake.Color,
+		Username: handshake.Username,
+		Pubkey:   handshake.PublicKey,
+		Room:     "",
+	}
 }
