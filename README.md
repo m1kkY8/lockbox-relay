@@ -1,6 +1,6 @@
 # Relay server for chat application
 
-- This is relay server for [Gochat](https://github.com/m1kkY8/gochat)
+- This is relay server for [Lockbox](https://github.com/m1kkY8/lockbox)
 
 ## Prerequisites
 
