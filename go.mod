@@ -1,4 +1,4 @@
-module github.com/m1kkY8/gochat-relay
+module github.com/m1kkY8/lockbox-relay
 
 go 1.23.1
 

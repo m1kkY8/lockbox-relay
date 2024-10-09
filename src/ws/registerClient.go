@@ -1,8 +1,8 @@
 package ws
 
 import (
-	"github.com/m1kkY8/gochat-relay/src/entity"
-	"github.com/m1kkY8/gochat-relay/src/util"
+	"github.com/m1kkY8/lockbox-relay/src/entity"
+	"github.com/m1kkY8/lockbox-relay/src/util"
 )
 
 func (wsManager *WebsocketManager) registerClient(client *entity.ClientInfo) error {

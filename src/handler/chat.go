@@ -4,9 +4,9 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
-	"github.com/m1kkY8/gochat-relay/src/commands"
-	"github.com/m1kkY8/gochat-relay/src/entity"
-	"github.com/m1kkY8/gochat-relay/src/ws"
+	"github.com/m1kkY8/lockbox-relay/src/commands"
+	"github.com/m1kkY8/lockbox-relay/src/entity"
+	"github.com/m1kkY8/lockbox-relay/src/ws"
 )
 
 func EndpointHandler(wsManager *ws.WebsocketManager) gin.HandlerFunc {

@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/gorilla/websocket"
-	"github.com/m1kkY8/gochat-relay/src/entity"
+	"github.com/m1kkY8/lockbox-relay/src/entity"
 	"github.com/vmihailenco/msgpack/v5"
 )
 

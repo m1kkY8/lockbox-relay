@@ -277,7 +277,7 @@ sudo systemctl stop nginx
 2. Clone the repository
 
 ```bash
-git clone https://github.com/m1kkY8/gochat-relay.git
+git clone https://github.com/m1kkY8/lockbox-relay.git
 ```
 
 3. Create directory for the server where you want to run docker compose file from and copy contents of the configs folder to that directory
@@ -290,7 +290,7 @@ cd ~/<server_directory>
 4. Copy the contents of the configs folder to the server directory
 
 ```bash
-cp -r ~/gochat-relay/configs/* ~/<server_directory>
+cp -r ~/lockbox-relay/configs/* ~/<server_directory>
 ```
 
 Note: Server is currently running on docker image i built and pushed to docker hub, you can build the image yourself by running the following command in the server directory

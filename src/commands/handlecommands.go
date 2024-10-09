@@ -4,8 +4,8 @@ import (
 	"log"
 	"strings"
 
-	"github.com/m1kkY8/gochat-relay/src/entity"
-	"github.com/m1kkY8/gochat-relay/src/ws"
+	"github.com/m1kkY8/lockbox-relay/src/entity"
+	"github.com/m1kkY8/lockbox-relay/src/ws"
 )
 
 func HandleCommandMessage(wsManager *ws.WebsocketManager, client *entity.ClientInfo, decodedMessage *entity.Message) {
