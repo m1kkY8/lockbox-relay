@@ -93,19 +93,23 @@ ssh-copy-id -i ~/.ssh/<key_name>.pub root@<ip_address>
 
 ## Hardening the SSH
 
-1. We will change the default port to avoid bots, use your prefered text editor (I use vim)
-2. Find the line `#Port 22` and change it to `Port <port_number>`
-3. Disable root login by changing `PermitRootLogin yes` to `PermitRootLogin no`
-4. Disable password login by changing `PasswordAuthentication yes` to `PasswordAuthentication no`
-5. Disable empty password by changing `PermitEmptyPasswords yes` to `PermitEmptyPasswords no`
-6. Disable X11 forwarding by changing `X11Forwarding yes` to `X11Forwarding no`
-7. Set `MaxAuthTries` to 1 since we are using ssh keys
-8. Change `KbdInteractiveAuthentication yes` to `KbdInteractiveAuthentication no`
-9. Change `UsePAM yes` to `UsePAM no`
-10. Set `ClientAliveInterval 600`
-11. Set `ClientAliveCountMax 0`
-12. Change `Protocol 2` to use newer version of protocol
-13. Restart the ssh service
+```bash
+# Use your prefered text editor
+vim|nano /etc/ssh/sshd_config
+```
+
+1. Find `#Port 22` and change it to `Port <port_number>`, changing default port will prevent a lot of automated bots from cloging up our log file
+2. Disable root login by changing `PermitRootLogin yes` to `PermitRootLogin no`
+3. Disable password login by changing `PasswordAuthentication yes` to `PasswordAuthentication no`
+4. Disable empty password by changing `PermitEmptyPasswords yes` to `PermitEmptyPasswords no`
+5. Disable X11 forwarding by changing `X11Forwarding yes` to `X11Forwarding no`
+6. Set `MaxAuthTries` to 1 since we are using ssh keys
+7. Change `KbdInteractiveAuthentication yes` to `KbdInteractiveAuthentication no`
+8. Change `UsePAM yes` to `UsePAM no`
+9. Set `ClientAliveInterval 600`
+10. Set `ClientAliveCountMax 0`
+11. Change `Protocol 2` to use newer version of protocol
+12. Restart the ssh service
 
 ```bash
 sudo systemctl restart ssh
