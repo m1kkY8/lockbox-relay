@@ -2,4 +2,4 @@ services:
   irc:
     build: .
     ports:
-      - 6969: 1337
+      - 6969:1337
