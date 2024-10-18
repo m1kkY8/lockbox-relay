@@ -18,5 +18,5 @@ func main() {
 	router.GET("/ws", handler.EndpointHandler(wsManager))
 	router.GET("/health", handler.Health())
 
-	router.Run(":1337")
+	router.Run(":6969")
 }
