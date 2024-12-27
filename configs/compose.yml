@@ -7,6 +7,5 @@ services:
     ports:
       - "80:80"
       - "443:443"
-  irc:
-    image: m1kky8/irc:prod
-
+  relay:
+    image: m1kky8/lockbox-relay:latest

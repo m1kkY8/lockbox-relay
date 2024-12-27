@@ -15,7 +15,7 @@ func main() {
 
 	go wsManager.Start()
 
-	router.GET("/ws", handler.EndpointHandler(wsManager))
+	router.GET("/chat", handler.EndpointHandler(wsManager))
 	router.GET("/health", handler.Health())
 
 	router.Run(":6969")
